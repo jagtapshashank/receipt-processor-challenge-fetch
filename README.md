@@ -285,15 +285,14 @@ All rules follow those defined in the [challenge instructions](https://github.co
 
 ---
 
-## 💡 Reflections and Future Work
+## Reflections and Future Work
 
 This challenge was a great opportunity to integrate a lightweight backend and React UI. A few improvements I plan to explore:
 
-* Replace in-memory storage with Redis or SQLite for persistence
-* Modularize the backend using Blueprints
+* Replace in-memory storage with Redis or SQLite
 * Improve form validation in the frontend
-* Enhance error messages with more granular status codes
-* Add Swagger UI to visualize the OpenAPI spec
+* Enhance error messages with more granular status codes on backend (didn't implement as it was explicitly mentioned to follow given specs on backend)
+
 
 ---
 

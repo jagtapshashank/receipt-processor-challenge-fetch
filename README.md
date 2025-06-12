@@ -173,11 +173,11 @@ The React-based UI simplifies testing the receipt processor:
 
 ---
 
-## Error Handling
+## Error Handling / Edge Cases
 
 Robust error handling is implemented on both the **backend** and **frontend** to ensure data integrity, user guidance, and graceful failure in case of incorrect input or system issues.
 
-### Backend Error Handling (Flask)
+### Backend Error Handling / Edge Cases (Flask)
 
 The backend validates incoming requests thoroughly and returns meaningful HTTP error codes with explanatory messages in accordance with OpenAPI standards given in `static/api.yml`.
 
@@ -209,7 +209,7 @@ The backend validates incoming requests thoroughly and returns meaningful HTTP e
 
 ---
 
-### Frontend Error Handling (React)
+### Frontend Error Handling / Edge Cases (React)
 
 The frontend includes pre-submission validation, clear user feedback, and response-based error handling to improve UX and reduce load on the backend.
 
@@ -242,6 +242,14 @@ The frontend includes pre-submission validation, clear user feedback, and respon
 #### 4. **Input Safeguards**
 
 * **Prevent Deleting All Items**: The frontend prevents users from removing the last remaining item, since at least one is required by the backend.
+
+---
+
+## Points Calculation Rules (Summary)
+
+The backend calculates points based on a variety of rules:
+
+All rules follow those defined in the [challenge instructions](https://github.com/fetch-rewards/receipt-processor-challenge).
 
 ---
 
@@ -278,11 +286,61 @@ While the current implementation handles most core validation scenarios, there a
 
 ---
 
-## Points Calculation Rules (Summary)
+## Handling High Load (Future Scope)
 
-The backend calculates points based on a variety of rules:
+To ensure my application remains responsive under heavy traffic or large-scale usage, the following strategies could be implemented:
 
-All rules follow those defined in the [challenge instructions](https://github.com/fetch-rewards/receipt-processor-challenge).
+### 1. **Asynchronous Processing with Celery + Redis**
+
+Receipt processing (point calculation) can be computationally expensive when handling many requests. Instead of processing synchronously within the request cycle, we can offload the work to a **background task queue** using [Celery](https://docs.celeryq.dev/) and [Redis](https://redis.io/).
+
+**Why?**
+
+* Improves response time — the API returns a receipt ID immediately.
+* Frees up the main app to handle more incoming requests.
+* Enables better scalability under burst loads.
+
+**Example scenario:**
+
+A mobile app submits 500 receipts at once. Without Celery, the server might time out or hang. With background processing, each receipt is queued, and results are processed in the background.
+
+```bash
+curl -X POST http://localhost:8080/receipts/process
+# → Returns immediately with {"id": "1234-5678"}
+```
+
+The client can then check:
+
+```bash
+curl http://localhost:8080/receipts/1234-5678/points
+```
+
+---
+
+### 2. **Persistent Storage**
+
+The current app uses an in-memory store to map receipt IDs to points. This is suitable for testing but not reliable in production.
+
+**Why switch to a database?**
+
+* In-memory data is lost if the app restarts.
+* A database like **SQLite or PostgreSQL** ensures durability and consistency.
+* Enables analytics, reporting, or user-specific tracking.
+
+---
+
+### 3. **Rate Limiting**
+
+To prevent abuse (DDos) or accidental overload, we can use a rate limiter (e.g., with `Flask-Limiter`) to cap the number of API calls per client.
+
+**Why?**
+
+* Protects the server from being overwhelmed by too many requests.
+* Helps maintain consistent performance for all users.
+
+**Example scenario:**
+
+If a single user sends 1000 requests per minute, we can limit them to 10 requests per minute to ensure fair usage.
 
 ---
 

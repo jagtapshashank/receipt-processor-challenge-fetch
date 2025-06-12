@@ -134,7 +134,8 @@ curl http://localhost:8080/receipts/42cfea9c-7cc0-47e9-91a2-fa97c6e9b4e4/points
 ```
 
 ---
-Note: Initially I used Postman where I created 2 requests:
+Fun Fact: I initially used Postman where I created two requests mentioned below as I am more familiar with it than curl
+
 1. POST request with:
    * URL: `http://localhost:8080/receipts/process`
    * Enter this json data in `Body/raw` and set it to `JSON`
